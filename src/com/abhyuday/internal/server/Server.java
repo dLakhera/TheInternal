@@ -67,17 +67,31 @@ public class Server implements Runnable {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					clients.add(new ServerClient("droidlakhera", packet.getAddress(), packet.getPort(),50));
+					process(packet);
 					
-					System.out.println(clients.get(0).ipAddress.toString() + ":" + clients.get(0).port);
-					
-					String packetString = new String(packet.getData());
-					System.out.println(packetString);
+					// Sending it to the console
+					// clients.add(new ServerClient("droidlakhera", packet.getAddress(), packet.getPort(),50));
+					// System.out.println(clients.get(0).ipAddress.toString() + ":" + clients.get(0).port);
 				}
 			}
 		};
 		
 		receive.start();
 	}
+	
+	
+	private void process(DatagramPacket packet) {
+		String string = new String(packet.getData());
+		
+		if(string.startsWith("/c/")) {
+			String name = string.substring(3,string.length());
+			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(),50));
+			System.out.println("Connection packet: " + name);
+		} else {
+			System.out.println(string);
+		}
+	}
+	
+	
 
 }

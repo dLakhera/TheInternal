@@ -52,7 +52,7 @@ public class Client extends JFrame {
 		this.address = address;
 		this.port = port;
 
-		boolean connect = openConnection(address);
+		boolean connect = openConnection(this.address);
 		
 		
 		if(!connect) {
@@ -64,9 +64,9 @@ public class Client extends JFrame {
 		this.setMinimumSize(getMinimumSize());
 		console("Successfully connected!");
 		console("For the user:"+ name + " on the address: " + address + ":" + port + "!");
-		String connection = name + " connceted from "+address+":"+port;
+		String connection = "/c/"+name;
 		
-		send(connection);
+		send(connection.getBytes());
 	}
 
 	
