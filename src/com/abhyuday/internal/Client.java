@@ -15,6 +15,8 @@ import java.awt.Insets;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Client extends JFrame {
 
@@ -73,6 +75,14 @@ public class Client extends JFrame {
 		contentPane.add(txtrHistory, gbc_txtrHistory);
 		
 		txtMessage = new JTextField();
+		txtMessage.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					String message = txtMessage.getText();
+					send(message);
+				}
+			}
+		});
 		GridBagConstraints gbc_txtMessage = new GridBagConstraints();
 		gbc_txtMessage.insets = new Insets(0, 0, 0, 5);
 		gbc_txtMessage.fill = GridBagConstraints.HORIZONTAL;
@@ -85,8 +95,7 @@ public class Client extends JFrame {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String message = txtMessage.getText();
-				console(name + ": " +message);
-				txtMessage.setText("");
+				send(message);
 			}
 		});
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
@@ -97,6 +106,14 @@ public class Client extends JFrame {
 		setVisible(true);
 		
 		txtMessage.requestFocusInWindow();
+	}
+	
+	private void send(String message) {
+		if(message.equals("")) {
+			return;
+		}
+		console(name + ": " +message);
+		txtMessage.setText("");		
 	}
 	
 	public void console(String message) {

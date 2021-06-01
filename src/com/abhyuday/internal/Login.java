@@ -12,6 +12,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Login extends JFrame {
 
@@ -86,6 +88,15 @@ public class Login extends JFrame {
 		contentPane.add(lblPortDesc);
 		
 		JButton btnLogin = new JButton("Login");
+		btnLogin.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				String nameString = txtName.getText();
+				String addressString = txtAddress.getText();
+				int port = Integer.parseInt(txtPort.getText());
+				
+				login(nameString, addressString, port);
+			}
+		});
 		
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
