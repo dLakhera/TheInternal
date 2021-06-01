@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Server implements Runnable {
 	
@@ -84,9 +85,18 @@ public class Server implements Runnable {
 		String string = new String(packet.getData());
 		
 		if(string.startsWith("/c/")) {
+			
+			// Creating random ids: Method 1 =>
+			// UUID id = UUID.randomUUID();
+			
+			// Creating random ids: Method 2 =>
+			// using the uniqueIdentifier class that we made
+			
+			
 			String name = string.substring(3,string.length());
-			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(),50));
-			System.out.println("Connection packet: " + name);
+			int id = UniqueIdentifiers.getIdentifiers();
+			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(),id));
+			System.out.println("Connection packet: " + name + " with id: " + id);
 		} else {
 			System.out.println(string);
 		}
