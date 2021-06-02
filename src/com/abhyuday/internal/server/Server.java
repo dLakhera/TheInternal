@@ -1,14 +1,12 @@
 package com.abhyuday.internal.server;
 
-import java.io.Console;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-
 import java.util.List;
-import java.util.UUID;
 
 public class Server implements Runnable {
 	
@@ -20,7 +18,7 @@ public class Server implements Runnable {
 	private Thread run, manage, send, receive;
 	public boolean running = false;
 	
-	Server(int port){
+	public Server(int port){
 		this.port = port;
 		try {
 			socket = new DatagramSocket(port);
@@ -80,28 +78,51 @@ public class Server implements Runnable {
 		receive.start();
 	}
 	
+	private void sendToAll(String messageString) {
+		for(int i=0;i<clients.size();i++) {
+			ServerClient client = clients.get(i);
+			send(messageString, client.ipAddress, client.port);
+		}
+		System.out.println(messageString);
+	}
+	
+	private void send(final byte[] data, final InetAddress ipAddress, final int port) {
+		send = new Thread("Send") {
+			public void run() {
+				DatagramPacket packet = new DatagramPacket(data,data.length,ipAddress, port);
+				try {
+					socket.send(packet);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		
+		send.start();
+	}
+	
+	private void send(String message, InetAddress address, int port) {
+		message+= "/e/";
+		send(message.getBytes(),address, port);
+	}
 	
 	private void process(DatagramPacket packet) {
 		String string = new String(packet.getData());
 		
 		if(string.startsWith("/c/")) {
-			
-			// Creating random ids: Method 1 =>
-			// UUID id = UUID.randomUUID();
-			
-			// Creating random ids: Method 2 =>
-			// using the uniqueIdentifier class that we made
-			
-			
+	
 			String name = string.substring(3,string.length());
 			int id = UniqueIdentifiers.getIdentifiers();
 			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(),id));
 			System.out.println("Connection packet: " + name + " with id: " + id);
+			
+			String confirmationString = "/c/"+id;
+			send(confirmationString, packet.getAddress(), packet.getPort());
+			
+		} else if(string.startsWith("/m/")){
+			sendToAll(string);
 		} else {
-			System.out.println(string);
+			
 		}
 	}
-	
-	
-
 }
