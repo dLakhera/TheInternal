@@ -57,6 +57,7 @@ public class Server implements Runnable {
 		receive = new Thread("Receive") {
 			public void run() {
 				while(running) {
+					System.out.println(clients.size());
 					byte[] data = new byte[1024];
 					DatagramPacket packet = new DatagramPacket(data, data.length);
 					
@@ -67,10 +68,6 @@ public class Server implements Runnable {
 						e.printStackTrace();
 					}
 					process(packet);
-					
-					// Sending it to the console
-					// clients.add(new ServerClient("droidlakhera", packet.getAddress(), packet.getPort(),50));
-					// System.out.println(clients.get(0).ipAddress.toString() + ":" + clients.get(0).port);
 				}
 			}
 		};
@@ -78,12 +75,12 @@ public class Server implements Runnable {
 		receive.start();
 	}
 	
-	private void sendToAll(String messageString) {
+	private void broadcast(String messageString) {
 		for(int i=0;i<clients.size();i++) {
 			ServerClient client = clients.get(i);
 			send(messageString, client.ipAddress, client.port);
 		}
-		System.out.println(messageString);
+		System.out.println(messageString.substring(3,messageString.length()));
 	}
 	
 	private void send(final byte[] data, final InetAddress ipAddress, final int port) {
@@ -115,13 +112,13 @@ public class Server implements Runnable {
 			int id = UniqueIdentifiers.getIdentifiers();
 			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(),id));
 			System.out.println("Connection packet: " + name + " with id: " + id);
-			
 			String confirmationString = "/c/"+id;
 			send(confirmationString, packet.getAddress(), packet.getPort());
 			
 		} else if(string.startsWith("/m/")){
-			sendToAll(string);
-		} else {
+			broadcast(string);
+		} else if(string.startsWith("/d/")){
+			System.out.println("Disconnection request received");
 			
 		}
 	}

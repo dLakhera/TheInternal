@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -132,6 +134,15 @@ public class ClientInterface extends JFrame implements Runnable
 		gbc_btnNewButton.gridx = 2;
 		gbc_btnNewButton.gridy = 2;
 		contentPane.add(btnNewButton, gbc_btnNewButton);
+		
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.out.println("Closing");
+				String disconnect = "/d/" + client.getName() + ": " + client.getId() + "/e/";
+				client.send(disconnect.getBytes());
+			}
+		});
+		
 		setVisible(true);
 		
 		txtMessage.requestFocusInWindow();
@@ -151,6 +162,12 @@ public class ClientInterface extends JFrame implements Runnable
 					if(message.startsWith("/c/")) {
 						client.setID(Integer.parseInt(message.split("/c/|/e/")[1]));
 						console("Successfully connected to server! Id: "+ client.getId());
+					} else if(message.startsWith("/m/")) {
+						String test = message.split("/m/|/e/")[1];
+						console(test);
+					} else if(message.startsWith("/d/")) {
+						String disconnect = message.split("/d/|/e/")[1];
+						console("Disconnecting client with ID: " + disconnect);
 					}
 				}
 			}
@@ -163,7 +180,6 @@ public class ClientInterface extends JFrame implements Runnable
 			return;
 		}
 		String msgString = client.getName() + ": " +message; 
-		console(msgString);
 		msgString = "/m/" + msgString;
 		client.send(msgString.getBytes());
 		txtMessage.setText("");		

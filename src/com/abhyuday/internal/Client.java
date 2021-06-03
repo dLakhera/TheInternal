@@ -76,7 +76,7 @@ public class Client extends JFrame {
 		}
 	
 		String messageString = new String(packet.getData());
-		System.out.println(messageString+" : "+messageString.length());
+		System.out.println(messageString);
 		return messageString;
 	}
 	
@@ -93,7 +93,4 @@ public class Client extends JFrame {
 		};
 		send.start();
 	}
-
-
-
 }
