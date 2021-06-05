@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server implements Runnable {
 	
@@ -40,10 +41,34 @@ public class Server implements Runnable {
 		System.out.println("Running! On port: "+ port);
 		managerClients();
 		receive();
+		Scanner scanner = new Scanner(System.in);
+		while(running) {
+			String input = scanner.nextLine();
+			if(!input.startsWith("/")) {
+				broadcast("/m/Server: " + input + "/e/");
+				continue;
+			}
+			if(input.startsWith("/kick")) {
+				input = input.substring(6,input.length());
+				disconnect(Integer.parseInt(input), 2);
+			}
+			else if(input.startsWith("/show")) {
+				System.out.println("Names \t Ids");
+				for(int i=0;i<clients.size();i++) {
+					System.out.println(clients.get(i).getName() + "\t" + clients.get(i).getID());
+				}
+			} 
+			else if(input.startsWith("/end") || input.startsWith("/exit") || input.startsWith("/destroy")) {
+				for(int i=0;i<clients.size();i++) {
+					disconnect(clients.get(i).getID(), 3);
+				}
+				System.out.println("Successfully kicked all clients!");
+				System.exit(0);
+			}
+		}
 	}
 
 	private void managerClients() {
-		// TODO Auto-generated method stub
 		manage = new Thread("Manage") {
 			@SuppressWarnings("deprecation")
 			public void run() {
@@ -61,7 +86,7 @@ public class Server implements Runnable {
 						ServerClient c = clients.get(i);
 						if(!clientResponse.contains(c.getID())) {
 							if((int)c.attempt > MAX_ATTEMPTS) {
-								disconnect(c.getID(), false);
+								disconnect(c.getID(), 1);
 							}else {
 								c.attempt++;							
 							}
@@ -70,6 +95,8 @@ public class Server implements Runnable {
 							c.attempt = 0;
 						}
 					}
+					
+					System.out.println(clients.size());
 				}
 			}
 		};
@@ -142,13 +169,13 @@ public class Server implements Runnable {
 			System.out.println("Disconnection request received");
 			System.out.println("int the process func: " + string);
 			String id = string.split("/d/|/e/")[1];
-			disconnect(Integer.parseInt(id),true);
+			disconnect(Integer.parseInt(id),0);
 		} else if(string.startsWith("/i/")) {
 			clientResponse.add(Integer.parseInt(string.split("/i/|/e/")[1]));
 		}
 	}
 
-	private void disconnect(int id, boolean status) {
+	private void disconnect(int id, int status) {
 		int i=0;
 		ServerClient exp = null;
 		for(i=0;i<clients.size();i++) {
@@ -160,11 +187,17 @@ public class Server implements Runnable {
 		}
 		String message ="";
 		
-		if(status) {
+		if(status == 0) {
 			message = "/d/Client " + exp.name + " disconnected./e/"; 
 			broadcast(message);
-		} else {
+		} else if(status == 1) {
 			message = "/d/Client " + exp.name + " timed out./e/"; 
+			broadcast(message);
+		} else if(status == 2) {
+			message = "/d/Client: " + exp.name + " got kicked by Server Admin./e/";
+			broadcast(message);
+		} else if(status == 3) {
+			message = "/d/Server has terminated for now! See you around tho :)/e/";
 			broadcast(message);
 		}
 		System.out.println("this is the braodcast message: " + message);
