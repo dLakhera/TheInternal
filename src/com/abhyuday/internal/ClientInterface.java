@@ -138,8 +138,17 @@ public class ClientInterface extends JFrame implements Runnable
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				System.out.println("Closing");
-				String disconnect = "/d/" + client.getName() + ": " + client.getId() + "/e/";
+				String disconnect = "/d/" + client.getId() + "/e/";
 				client.send(disconnect.getBytes());
+				running = false;
+
+				client.close();
+				
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		
@@ -166,8 +175,13 @@ public class ClientInterface extends JFrame implements Runnable
 						String test = message.split("/m/|/e/")[1];
 						console(test);
 					} else if(message.startsWith("/d/")) {
+						System.out.println("From clientInterface :" + message);
 						String disconnect = message.split("/d/|/e/")[1];
-						console("Disconnecting client with ID: " + disconnect);
+						System.out.println("After splitting the string: " + disconnect);
+						console(disconnect);
+					} else if (message.startsWith("/i/")) {
+						String connect = "/i/"+client.getId()+"/e/";
+						client.send(connect.getBytes());
 					}
 				}
 			}
@@ -180,7 +194,7 @@ public class ClientInterface extends JFrame implements Runnable
 			return;
 		}
 		String msgString = client.getName() + ": " +message; 
-		msgString = "/m/" + msgString;
+		msgString = "/m/" + msgString +"/e/";
 		client.send(msgString.getBytes());
 		txtMessage.setText("");		
 	}

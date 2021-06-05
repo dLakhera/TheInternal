@@ -18,7 +18,7 @@ public class ServerClient {
 		this.port = port;
 	}
 	
-	private int getID() {
+	public int getID() {
 		return ID;
 	}
 }
